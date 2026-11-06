@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>QDG RADIO // TELEVIDEO ARCHIVE // CRT WEB RADIO</title>
+<meta name="description" content="QDG Radio - Stazione Web Radio e Archivio Mixati con interfaccia Televideo / Teletext CRT anni '80/'90, Web Audio API e Visualizer in tempo reale.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/televideo.css">
+</head>
+<body class="televideo-body">
+
+<!-- SORGENTE AUDIO PRINCIPALE -->
+<audio id="core-player" src="test-track.mp3" crossorigin="anonymous" preload="auto" style="display:none;"></audio>
+
+<!-- SCHERMO CRT TELEVIDEO -->
+<main class="televideo-screen" id="crt-screen">
+
+    <!-- RIGA SUPERIORE STANDARD TELETEXT -->
+    <header class="header-top t-yel">
+        <span id="tx-status" class="status-pill">P100 RADIOFAX 1 STANDBY</span>
+        <span id="track-time" class="t-cya">00:00 / 00:00</span>
+        <span id="tx-clock" class="t-wht">Ven 06 Nov 17:00/00</span>
+    </header>
+
+    <!-- LOGO A BLOCCHI INVERTITI -->
+    <div class="logo-row" aria-label="Logo QDG Radio Televideo">
+        <div class="logo-block-white" id="logo-mix">M I X</div>
+        <div class="logo-block-blue">
+            <span class="logo-text">R A D I O F A X</span>
+            <span id="signal-mode" class="t-cya signal-badge">[IDLE]</span>
+        </div>
+    </div>
+
+    <!-- SOTTOTITOLO DOUBLE HEIGHT -->
+    <div class="sub-network t-yel">QDG RADIO NETWORK // PIRATE CRT BROADCAST</div>
+    <div class="double-height t-wht">
+        <span>ARCHIVIO MIXATI &amp; STREAMING DIRETTA</span>
+        <span class="t-yel page-badge" id="active-page-num">170</span>
+    </div>
+
+    <!-- SCORRIMENTO TIPO BREAKING NEWS -->
+    <div class="marquee-container" aria-live="polite">
+        <div class="marquee-content" id="tx-marquee">
+            *** QDG RADIO ONLINE *** CLICCA SU UNA TRACCIA O PREMI PLAY [100] PER AVVIARE L'AUDIO ENGINE ***
+        </div>
+    </div>
+
+    <!-- GABBIA A 2 COLONNE PER L'INDICE DEI CANALI -->
+    <section class="grid-2col" aria-label="Indice Canali e Pagine Televideo">
+        <!-- COLONNA SINISTRA -->
+        <div class="col">
+            <div class="index-row active" data-page="100" data-bpm="128" data-freq="55" data-preset="pirate" tabindex="0">
+                <span class="cat">A Z INDEX</span> <span class="page">100</span>
+            </div>
+            <div class="index-row" data-page="695" data-bpm="132" data-freq="65" data-preset="electro" tabindex="0">
+                <span class="cat">INFO RADIO</span> <span class="page">695</span>
+            </div>
+            <div class="index-row" data-page="570" data-bpm="140" data-freq="82" data-preset="glitch" tabindex="0">
+                <span class="cat">GLITCH ART</span> <span class="page">570</span>
+            </div>
+            <div class="index-row" data-page="510" data-bpm="125" data-freq="48" data-preset="hardware" tabindex="0">
+                <span class="cat">HARDWARE</span> <span class="page">510</span>
+            </div>
+
+            <div class="cyan-break">Il nuovo set Balearic Beats e' disponibile online</div>
+
+            <div class="index-row" data-page="500" data-bpm="135" data-freq="55" data-preset="techno" tabindex="0">
+                <span class="cat">TECHNO BEATS</span> <span class="page">500</span>
+            </div>
+            <div class="index-row" data-page="540" data-bpm="130" data-freq="60" data-preset="detroit" tabindex="0">
+                <span class="cat">DETROIT 90S</span> <span class="page">540</span>
+            </div>
+            <div class="index-row" data-page="200" data-bpm="110" data-freq="42" data-preset="ambient" tabindex="0">
+                <span class="cat">AMBIENT <span class="t-wht">MIX1</span></span> <span class="page">200</span>
+            </div>
+            <div class="index-row" data-page="550" data-bpm="118" data-freq="49" data-preset="vapor" tabindex="0">
+                <span class="cat">VAPORWAVE</span> <span class="page">550</span>
+            </div>
+
+            <div class="cyan-break">"Perche' staccare il cavo audio durante il live?"</div>
+
+            <div class="index-row" data-page="555" data-bpm="126" data-freq="58" data-preset="balearic" tabindex="0">
+                <span class="cat">GUEST MIX</span> <span class="page">555</span>
+            </div>
+            <div class="index-row" data-page="777" data-bpm="138" data-freq="73" data-preset="acid" tabindex="0">
+                <span class="cat">LIVE CHAT</span> <span class="page">777</span>
+            </div>
+        </div>
+
+        <!-- COLONNA DESTRA -->
+        <div class="col">
+            <div class="index-row" data-page="101" data-bpm="133" data-freq="62" data-preset="news" tabindex="0">
+                <span class="cat">NEWS FREQUENZE</span> <span class="page">101</span>
+            </div>
+            <div class="index-row" data-page="160" data-bpm="122" data-freq="52" data-preset="podcast" tabindex="0">
+                <span class="cat">PODCAST REGIONE</span> <span class="page">160</span>
+            </div>
+            <div class="index-row" data-page="710" data-bpm="128" data-freq="55" data-preset="tape" tabindex="0">
+                <span class="cat">TAPE REWIND</span> <span class="page">710</span>
+            </div>
+            <div class="index-row" data-page="640" data-bpm="142" data-freq="80" data-preset="channel" tabindex="0">
+                <span class="cat">RADIO</span> <span class="page t-wht">CH1 640</span>
+            </div>
+
+            <div class="cyan-break empty-spacer" aria-hidden="true">Linea teletext di sincronismo</div>
+
+            <div class="index-row" data-page="300" data-bpm="120" data-freq="46" data-preset="talk" tabindex="0">
+                <span class="cat">TALK SHOW</span> <span class="page">300</span>
+            </div>
+            <div class="index-row" data-page="888" data-bpm="124" data-freq="50" data-preset="interview" tabindex="0">
+                <span class="cat">INTERVISTE</span> <span class="page">888</span>
+            </div>
+            <div class="index-row" data-page="400" data-bpm="136" data-freq="68" data-preset="events" tabindex="0">
+                <span class="cat">EVENTI CLUB</span> <span class="page">400</span>
+            </div>
+            <div class="index-row" data-page="524" data-bpm="130" data-freq="58" data-preset="tracklist" tabindex="0">
+                <span class="cat">TRACKLISTS</span> <span class="page">524</span>
+            </div>
+
+            <div class="cyan-break">La 20esima puntata sblocca la trasmissione live...</div>
+
+            <div class="index-row" data-page="600" data-bpm="127" data-freq="54" data-preset="merch" tabindex="0">
+                <span class="cat">MERCHANDISE</span> <span class="page">600</span>
+            </div>
+            <div class="index-row" data-page="199" data-bpm="145" data-freq="90" data-preset="diag" tabindex="0">
+                <span class="cat">DIAGNOSTICA</span> <span class="page blink t-grn" id="diag-val">40</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- REACTIVE AUDIO VISUALIZER DECK -->
+    <section class="audio-deck" aria-label="Deck di Visualizzazione Audio CRT">
+        <div class="vu-section">
+            <div class="led-row" id="led-strip" title="Discrete Peak LED Meter">
+                <span class="led-label">PEAK</span>
+                <div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div>
+                <div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div>
+                <div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div>
+                <div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div>
+            </div>
+            <div class="ascii-vu-row">
+                <span class="t-yel">VCR-VU:</span>
+                <div id="vcr-vu" class="t-grn">▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒</div>
+                <span id="db-readout" class="t-cya">-INF dB</span>
+            </div>
+        </div>
+
+        <div class="osc-box" title="Oscilloscopio Vettore CRT">
+            <svg viewBox="0 0 260 54" preserveAspectRatio="none">
+                <path id="osc-path" d="M 0 27 L 260 27"></path>
+            </svg>
+            <span class="osc-tag">CRT 44.1kHz</span>
+        </div>
+    </section>
+
+    <!-- TELETEXT REMOTE KEYPAD / DIALER -->
+    <section class="remote-keypad-bar" aria-label="Tastierino Pagine Telecomando">
+        <div class="keypad-label t-cya">TELECOMANDO:</div>
+        <div class="keypad-digits" id="keypad-buttons">
+            <button type="button" class="num-btn" data-key="1">1</button>
+            <button type="button" class="num-btn" data-key="2">2</button>
+            <button type="button" class="num-btn" data-key="3">3</button>
+            <button type="button" class="num-btn" data-key="4">4</button>
+            <button type="button" class="num-btn" data-key="5">5</button>
+            <button type="button" class="num-btn" data-key="6">6</button>
+            <button type="button" class="num-btn" data-key="7">7</button>
+            <button type="button" class="num-btn" data-key="8">8</button>
+            <button type="button" class="num-btn" data-key="9">9</button>
+            <button type="button" class="num-btn" data-key="0">0</button>
+        </div>
+        <div class="volume-controls">
+            <button type="button" class="vol-btn" id="btn-vol-down" title="Abbassa Volume">- VOL</button>
+            <span id="vol-display" class="t-yel">85%</span>
+            <button type="button" class="vol-btn" id="btn-vol-up" title="Alza Volume">+ VOL</button>
+            <button type="button" class="vol-btn" id="btn-mute" title="Muto">MUTE</button>
+        </div>
+    </section>
+
+    <!-- FOOTER E BOTTONI FASTEXT -->
+    <footer class="footer-bar">
+        <span class="footer-slogan">Radiofax: La scena underground sulla tua tastiera</span>
+        <span id="footer-state" class="t-yel">AUDIO: READY</span>
+    </footer>
+
+    <nav class="fastext-keys" aria-label="Tasti Rapidi Fastext">
+        <button type="button" id="btn-play" class="f-key bg-red t-blk">
+            <span class="t-wht">► PLAY</span> 100
+        </button>
+        <button type="button" id="btn-stop" class="f-key bg-grn t-blk">
+            ■ STOP 102
+        </button>
+        <button type="button" id="btn-next" class="f-key bg-yel t-blk">
+            ⏭ NEXT 101
+        </button>
+        <button type="button" id="btn-synth" class="f-key t-cya btn-synth-outline">
+            SYNTH LIVE 199
+        </button>
+    </nav>
+
+</main>
+
+<script src="js/televideo.js"></script>
+</body>
+</html>

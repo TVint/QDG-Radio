@@ -1,0 +1,553 @@
+/* ============================================================================
+   QDG RADIO // TELEVIDEO ARCHIVE - STILE TELETEXT CRT (css/televideo.css)
+   Pure Vanilla CSS | Optimized CRT Scanlines & Full Mobile-Responsive Layout
+   ============================================================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+:root {
+    --tt-black:   #000000;
+    --tt-white:   #ffffff;
+    --tt-yellow:  #ffff00;
+    --tt-cyan:    #00ffff;
+    --tt-green:   #00ff00;
+    --tt-red:     #ff0000;
+    --tt-blue:    #0000ee;
+    --tt-blue-dark: #000088;
+    --tt-magenta: #ff00ff;
+    --font-teletext: 'VT323', 'Courier New', monospace;
+}
+
+body.televideo-body {
+    background-color: var(--tt-black);
+    color: var(--tt-white);
+    font-family: var(--font-teletext);
+    font-size: 25px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    padding: 12px 10px 30px;
+}
+
+/* CRT SCANLINES & VIGNETTE OVERLAY (Hardware Accelerated) */
+body.televideo-body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.32) 50%),
+        radial-gradient(circle at center, transparent 65%, rgba(0, 0, 0, 0.6) 100%);
+    background-size: 100% 4px, 100% 100%;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* MAIN CRT CONTAINER */
+.televideo-screen {
+    width: 100%;
+    max-width: 960px;
+    background: var(--tt-black);
+    padding: 16px 20px;
+    margin: 0 auto;
+    border: 2px solid #1a1a1a;
+    box-shadow: 0 0 45px rgba(0, 255, 255, 0.08), inset 0 0 20px rgba(0, 0, 0, 0.8);
+    position: relative;
+    border-radius: 4px;
+}
+
+/* COLORI TESTO TELETEXT */
+.t-yel { color: var(--tt-yellow); }
+.t-cya { color: var(--tt-cyan); }
+.t-grn { color: var(--tt-green); }
+.t-red { color: var(--tt-red); }
+.t-mag { color: var(--tt-magenta); }
+.t-wht { color: var(--tt-white); }
+.t-blk { color: var(--tt-black); }
+
+/* SFONDI TELETEXT */
+.bg-blu { background-color: var(--tt-blue); }
+.bg-wht { background-color: var(--tt-white); }
+.bg-red { background-color: var(--tt-red); }
+.bg-grn { background-color: var(--tt-green); }
+.bg-yel { background-color: var(--tt-yellow); }
+.bg-cya { background-color: var(--tt-cyan); }
+
+/* HEADER SUPERIORE */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 10px;
+    font-size: 24px;
+    flex-wrap: wrap;
+}
+
+.status-pill {
+    padding: 0 6px;
+    transition: background-color 0.1s step-end;
+}
+
+/* LOGO A BLOCCHI INVERTITI */
+.logo-row {
+    display: flex;
+    align-items: stretch;
+    font-size: clamp(32px, 5vw, 48px);
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.logo-block-white {
+    background-color: var(--tt-white);
+    color: var(--tt-black);
+    padding: 2px 14px;
+    letter-spacing: 5px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.08s step-end;
+}
+
+.logo-block-blue {
+    background-color: var(--tt-blue);
+    color: var(--tt-yellow);
+    flex-grow: 1;
+    padding: 2px 18px;
+    letter-spacing: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.signal-badge {
+    font-size: clamp(18px, 3vw, 24px);
+    letter-spacing: 2px;
+}
+
+/* SOTTOTITOLO DOUBLE HEIGHT */
+.sub-network {
+    margin-top: 4px;
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+.double-height {
+    font-size: clamp(22px, 3.8vw, 32px);
+    transform: scaleY(1.22);
+    transform-origin: top;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 1px;
+}
+
+.page-badge {
+    background: var(--tt-blue);
+    color: var(--tt-yellow);
+    padding: 0 6px;
+}
+
+/* MARQUEE TIPO BREAKING NEWS */
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    background: #030310;
+    border-top: 2px solid var(--tt-blue);
+    border-bottom: 2px solid var(--tt-blue);
+    color: var(--tt-green);
+    padding: 3px 0;
+    margin-bottom: 12px;
+    font-size: 23px;
+}
+
+.marquee-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee-anim 20s linear infinite;
+    will-change: transform;
+}
+
+@keyframes marquee-anim {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* GABBIA A 2 COLONNE PER L'INDICE */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+}
+
+.index-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    padding: 1px 6px;
+    cursor: pointer;
+    font-size: 24px;
+    transition: background-color 0.05s step-end;
+    border-left: 3px solid transparent;
+}
+
+.index-row:hover,
+.index-row:focus-visible {
+    background-color: var(--tt-blue-dark);
+    outline: none;
+    border-left-color: var(--tt-cyan);
+}
+
+.index-row.active {
+    background-color: var(--tt-blue);
+    border-left-color: var(--tt-yellow);
+}
+
+.index-row.active .cat {
+    color: var(--tt-white);
+}
+
+.index-row.active .page {
+    color: var(--tt-yellow);
+    font-weight: bold;
+}
+
+.index-row .cat {
+    color: var(--tt-yellow);
+}
+
+.index-row .page {
+    color: var(--tt-white);
+    text-align: right;
+}
+
+.cyan-break {
+    color: var(--tt-cyan);
+    margin: 8px 0;
+    font-size: 20px;
+    line-height: 1.15;
+}
+
+.empty-spacer {
+    visibility: hidden;
+}
+
+/* REACTIVE AUDIO DECK */
+.audio-deck {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 16px;
+    align-items: center;
+    border-top: 3px solid var(--tt-blue);
+    padding-top: 10px;
+    margin-top: 6px;
+}
+
+.vu-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Discrete LED Peak Meter */
+.led-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.led-label {
+    color: var(--tt-cyan);
+    width: 52px;
+    font-size: 22px;
+}
+
+.led {
+    flex: 1;
+    height: 16px;
+    background-color: #161616;
+    border: 1px solid #2b2b2b;
+    transition: background-color 0.04s step-end, box-shadow 0.04s step-end;
+}
+
+.led.active.lvl-green  { background-color: var(--tt-green);  box-shadow: 0 0 6px var(--tt-green); }
+.led.active.lvl-yellow { background-color: var(--tt-yellow); box-shadow: 0 0 6px var(--tt-yellow); }
+.led.active.lvl-red    { background-color: var(--tt-red);    box-shadow: 0 0 8px var(--tt-red); }
+
+/* ASCII VU Meter */
+.ascii-vu-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 23px;
+}
+
+#vcr-vu {
+    letter-spacing: 2px;
+    font-family: var(--font-teletext);
+}
+
+/* SVG Oscilloscope */
+.osc-box {
+    background: #020208;
+    border: 2px solid var(--tt-blue);
+    height: 56px;
+    position: relative;
+    overflow: hidden;
+}
+
+.osc-box svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#osc-path {
+    fill: none;
+    stroke: var(--tt-cyan);
+    stroke-width: 2.2;
+    stroke-linejoin: bevel;
+    filter: drop-shadow(0 0 4px var(--tt-cyan));
+}
+
+.osc-tag {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 14px;
+    color: #445588;
+    letter-spacing: 1px;
+}
+
+/* TELETEXT REMOTE KEYPAD / DIALER */
+.remote-keypad-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #0a0a14;
+    border: 1px solid var(--tt-blue);
+    padding: 6px 10px;
+    margin: 10px 0;
+    font-size: 20px;
+    flex-wrap: wrap;
+}
+
+.keypad-label {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.keypad-digits {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.num-btn {
+    background: #111422;
+    color: var(--tt-white);
+    border: 1px solid #334466;
+    font-family: var(--font-teletext);
+    font-size: 20px;
+    width: 26px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.08s step-end;
+}
+
+.num-btn:hover {
+    background: var(--tt-blue);
+    color: var(--tt-yellow);
+    border-color: var(--tt-yellow);
+}
+
+.num-btn:active {
+    background: var(--tt-yellow);
+    color: var(--tt-black);
+}
+
+.volume-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vol-btn {
+    background: #111422;
+    color: var(--tt-cyan);
+    border: 1px solid #334466;
+    font-family: var(--font-teletext);
+    font-size: 18px;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+
+.vol-btn:hover {
+    background: var(--tt-cyan);
+    color: var(--tt-black);
+}
+
+#vol-display {
+    width: 48px;
+    text-align: center;
+}
+
+/* FOOTER & FASTEXT KEYS */
+.footer-bar {
+    background-color: var(--tt-blue);
+    color: var(--tt-cyan);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    margin: 8px 0;
+    font-size: 22px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.fastext-keys {
+    display: flex;
+    font-size: 23px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.f-key {
+    padding: 4px 12px;
+    color: var(--tt-black);
+    cursor: pointer;
+    font-family: var(--font-teletext);
+    font-size: 22px;
+    font-weight: bold;
+    border: none;
+    transition: transform 0.05s step-end, filter 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.f-key:hover {
+    filter: brightness(1.2);
+}
+
+.f-key:active {
+    transform: translateY(2px);
+}
+
+.btn-synth-outline {
+    background: transparent;
+    border: 1px solid var(--tt-cyan);
+    color: var(--tt-cyan);
+    margin-left: auto;
+}
+
+.btn-synth-outline:hover {
+    background: var(--tt-cyan);
+    color: var(--tt-black);
+}
+
+/* BLINK ANIMATION */
+.blink {
+    animation: blink-anim 0.9s step-end infinite;
+}
+
+@keyframes blink-anim {
+    50% { opacity: 0; }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN (MOBILE & TABLET OPTIMIZATIONS)
+   ============================================================================ */
+@media (max-width: 720px) {
+    body.televideo-body {
+        padding: 6px 4px 20px;
+        font-size: 22px;
+    }
+
+    .televideo-screen {
+        padding: 10px 12px;
+    }
+
+    .grid-2col {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .audio-deck {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .osc-box {
+        height: 48px;
+    }
+
+    .fastext-keys {
+        gap: 6px;
+    }
+
+    .f-key {
+        font-size: 19px;
+        padding: 4px 8px;
+    }
+
+    .btn-synth-outline {
+        margin-left: 0;
+    }
+
+    .remote-keypad-bar {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    body.televideo-body {
+        font-size: 20px;
+    }
+
+    .logo-block-white {
+        padding: 2px 8px;
+        letter-spacing: 3px;
+    }
+
+    .logo-block-blue {
+        padding: 2px 8px;
+        letter-spacing: 3px;
+    }
+
+    .f-key {
+        flex: 1 1 45%;
+        justify-content: center;
+        font-size: 17px;
+    }
+
+    .keypad-digits {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
