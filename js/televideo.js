@@ -1,13 +1,15 @@
 /**
  * ============================================================================
- * QDG RADIO // TELEVIDEO ARCHIVE - WEB AUDIO CONTROLLER (js/televideo.js)
+ * QDG RADIO // TELEVIDEO ARCHIVE - WEB AUDIO & LIVE STREAM RECEIVER (js/televideo.js)
  * Pure Vanilla ES6 JavaScript | Zero External Dependencies
- * Real-Time Teletext CRT Interface, Dual Stream & Generative Synth Engine
+ * Synchronized in Real Time with P999 Master Control Room (admin.html)
  * ============================================================================
  */
 
 (() => {
     'use strict';
+
+    const syncBus = window.QDGRadioSync;
 
     const CONFIG = {
         fftSize: 256,
@@ -18,7 +20,6 @@
         defaultVolume: 0.85
     };
 
-    // Preset Sonori Generativi per le Pagine Televideo
     const PRESETS = {
         pirate:    { bpm: 128, rootFreq: 55,  pattern: [1, 1, 1.5, 1, 1.2, 1, 1.8, 1.5], filterQ: 8 },
         techno:    { bpm: 135, rootFreq: 50,  pattern: [1, 1.5, 1, 2, 1, 1.33, 1, 1.5],   filterQ: 10 },
@@ -33,6 +34,10 @@
     const state = {
         audioCtx: null,
         mediaSource: null,
+        musicGain: null,
+        eqLow: null,
+        eqMid: null,
+        eqHigh: null,
         analyser: null,
         masterGain: null,
         freqData: null,
@@ -51,21 +56,24 @@
         dialTimeout: null
     };
 
-    // Elementi DOM
-    const audioEl       = document.getElementById('core-player');
-    const statusEl      = document.getElementById('tx-status');
-    const trackTimeEl   = document.getElementById('track-time');
-    const clockEl       = document.getElementById('tx-clock');
-    const marqueeEl     = document.getElementById('tx-marquee');
-    const vcrVuEl       = document.getElementById('vcr-vu');
-    const dbReadoutEl   = document.getElementById('db-readout');
-    const oscPathEl     = document.getElementById('osc-path');
-    const diagValEl     = document.getElementById('diag-val');
-    const signalModeEl  = document.getElementById('signal-mode');
-    const footerStateEl = document.getElementById('footer-state');
-    const activePageEl  = document.getElementById('active-page-num');
-    const logoMixEl     = document.getElementById('logo-mix');
-    const volDisplayEl  = document.getElementById('vol-display');
+    // DOM Elements
+    const audioEl        = document.getElementById('core-player');
+    const crtScreenEl    = document.getElementById('crt-screen');
+    const alertBannerEl  = document.getElementById('tx-alert-banner');
+    const alertTextEl    = document.getElementById('tx-alert-text');
+    const statusEl       = document.getElementById('tx-status');
+    const trackTimeEl    = document.getElementById('track-time');
+    const clockEl        = document.getElementById('tx-clock');
+    const marqueeEl      = document.getElementById('tx-marquee');
+    const vcrVuEl        = document.getElementById('vcr-vu');
+    const dbReadoutEl    = document.getElementById('db-readout');
+    const oscPathEl      = document.getElementById('osc-path');
+    const diagValEl      = document.getElementById('diag-val');
+    const signalModeEl   = document.getElementById('signal-mode');
+    const footerStateEl  = document.getElementById('footer-state');
+    const activePageEl   = document.getElementById('active-page-num');
+    const logoMixEl      = document.getElementById('logo-mix');
+    const volDisplayEl   = document.getElementById('vol-display');
 
     const ledEls    = Array.from(document.querySelectorAll('#led-strip .led'));
     const indexRows = Array.from(document.querySelectorAll('.index-row'));
@@ -79,12 +87,28 @@
     const btnMute    = document.getElementById('btn-mute');
 
     /**
-     * Inizializzazione Web Audio API Graph
+     * 1. INITIALIZE WEB AUDIO API WITH 3-BAND BROADCAST EQ & ANALYSER
      */
     function initAudioEngine() {
         if (!state.audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             state.audioCtx = new AudioContextClass();
+
+            state.musicGain = state.audioCtx.createGain();
+            state.musicGain.gain.value = 0.90;
+
+            state.eqLow = state.audioCtx.createBiquadFilter();
+            state.eqLow.type = 'lowshelf';
+            state.eqLow.frequency.value = 80;
+
+            state.eqMid = state.audioCtx.createBiquadFilter();
+            state.eqMid.type = 'peaking';
+            state.eqMid.frequency.value = 1000;
+            state.eqMid.Q.value = 1.0;
+
+            state.eqHigh = state.audioCtx.createBiquadFilter();
+            state.eqHigh.type = 'highshelf';
+            state.eqHigh.frequency.value = 10000;
 
             state.analyser = state.audioCtx.createAnalyser();
             state.analyser.fftSize = CONFIG.fftSize;
@@ -99,12 +123,16 @@
             try {
                 if (audioEl) {
                     state.mediaSource = state.audioCtx.createMediaElementSource(audioEl);
-                    state.mediaSource.connect(state.analyser);
+                    state.mediaSource.connect(state.musicGain);
                 }
             } catch (e) {
                 console.warn('[QDG RADIO] MediaElementSource fallback.');
             }
 
+            state.musicGain.connect(state.eqLow);
+            state.eqLow.connect(state.eqMid);
+            state.eqMid.connect(state.eqHigh);
+            state.eqHigh.connect(state.analyser);
             state.analyser.connect(state.masterGain);
             state.masterGain.connect(state.audioCtx.destination);
         }
@@ -115,7 +143,7 @@
     }
 
     /**
-     * Motore Sonoro Generativo (Generative Synth Engine)
+     * 2. GENERATIVE SYNTH ENGINE
      */
     function startPirateSynth(presetName = 'pirate', bpm = 128, rootFreq = 55) {
         stopPirateSynth();
@@ -136,7 +164,6 @@
             const now = state.audioCtx.currentTime;
             const step = state.synthStep % 16;
 
-            // 1. KICK DRUM (ogni 4 sedicesimi)
             if (step % 4 === 0) {
                 const kickOsc = state.audioCtx.createOscillator();
                 const kickGain = state.audioCtx.createGain();
@@ -148,12 +175,11 @@
                 kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
 
                 kickOsc.connect(kickGain);
-                kickGain.connect(state.analyser);
+                kickGain.connect(state.musicGain);
                 kickOsc.start(now);
                 kickOsc.stop(now + 0.23);
             }
 
-            // 2. BASSLINE CON FILTRO RISONANTE TELETEXT
             if (step % 2 === 1 || step === 2 || step === 14) {
                 const bassOsc = state.audioCtx.createOscillator();
                 const filter = state.audioCtx.createBiquadFilter();
@@ -173,12 +199,11 @@
 
                 bassOsc.connect(filter);
                 filter.connect(bassGain);
-                bassGain.connect(state.analyser);
+                bassGain.connect(state.musicGain);
                 bassOsc.start(now);
                 bassOsc.stop(now + 0.14);
             }
 
-            // 3. HI-HAT ANALOGICO (off-beat)
             if (step % 4 === 2) {
                 const hatNode = state.audioCtx.createBufferSource();
                 const bufferSize = state.audioCtx.sampleRate * 0.04;
@@ -199,7 +224,7 @@
 
                 hatNode.connect(hatFilter);
                 hatFilter.connect(hatGain);
-                hatGain.connect(state.analyser);
+                hatGain.connect(state.musicGain);
                 hatNode.start(now);
                 hatNode.stop(now + 0.04);
             }
@@ -218,7 +243,73 @@
     }
 
     /**
-     * Visualizer Loop a 60fps con requestAnimationFrame
+     * 3. PLAY JINGLE / STATION FX RECEIVED FROM P999 ADMIN REGIA
+     */
+    function playReceivedJingle(jingleType) {
+        initAudioEngine();
+        if (!state.audioCtx) return;
+        const now = state.audioCtx.currentTime;
+
+        if (jingleType === 'crt_glitch' && crtScreenEl) {
+            crtScreenEl.classList.remove('crt-glitch-pulse');
+            void crtScreenEl.offsetWidth;
+            crtScreenEl.classList.add('crt-glitch-pulse');
+        }
+
+        const osc = state.audioCtx.createOscillator();
+        const gain = state.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(state.analyser);
+
+        if (jingleType === 'station_id') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.14);
+            osc.frequency.setValueAtTime(783.99, now + 0.28);
+            osc.frequency.setValueAtTime(1046.5, now + 0.42);
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+            osc.start(now);
+            osc.stop(now + 0.86);
+        } else if (jingleType === 'siren') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.linearRampToValueAtTime(880, now + 0.35);
+            osc.frequency.linearRampToValueAtTime(320, now + 0.70);
+            osc.frequency.linearRampToValueAtTime(920, now + 1.05);
+            gain.gain.setValueAtTime(0.26, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+            osc.start(now);
+            osc.stop(now + 1.22);
+        } else if (jingleType === 'laser') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(1800, now);
+            osc.frequency.exponentialRampToValueAtTime(42, now + 0.45);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } else if (jingleType === 'rewind') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(120, now);
+            osc.frequency.exponentialRampToValueAtTime(2200, now + 0.55);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.58);
+            osc.start(now);
+            osc.stop(now + 0.6);
+        } else {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1000, now);
+            osc.frequency.setValueAtTime(1000, now + 0.18);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+            osc.start(now);
+            osc.stop(now + 0.42);
+        }
+    }
+
+    /**
+     * 4. VISUALIZER 60FPS LOOP
      */
     function renderVisuals() {
         if (!state.isPlaying || !state.analyser) return;
@@ -235,7 +326,6 @@
         const bassEnergy = (state.freqData[0] + state.freqData[1] + state.freqData[2] + state.freqData[3]) / 4;
         const peakNorm = Math.min(1, Math.max(avgVolume / 130, (bassEnergy / 255) * 0.94));
 
-        // 1. Discrete LED Peak Strip
         const litLeds = Math.round(peakNorm * ledEls.length);
         for (let i = 0; i < ledEls.length; i++) {
             const led = ledEls[i];
@@ -248,7 +338,6 @@
             led.classList.toggle('lvl-red',    isActive && ratio > 0.85);
         }
 
-        // 2. ASCII VU Meter
         if (vcrVuEl) {
             const fullChars  = Math.round(peakNorm * CONFIG.vuTotalChars);
             const emptyChars = Math.max(0, CONFIG.vuTotalChars - fullChars);
@@ -259,13 +348,11 @@
             vcrVuEl.className = peakNorm > 0.85 ? 't-red' : (peakNorm > 0.65 ? 't-yel' : 't-grn');
         }
 
-        // 3. Decibel Readout
         if (dbReadoutEl) {
             const db = peakNorm > 0.01 ? (20 * Math.log10(peakNorm)).toFixed(1) : '-INF';
             dbReadoutEl.textContent = `${db} dB`;
         }
 
-        // 4. SVG Oscilloscope
         if (oscPathEl) {
             const width = 260;
             const height = 54;
@@ -283,7 +370,6 @@
             oscPathEl.style.stroke = peakNorm > 0.85 ? 'var(--tt-red)' : (peakNorm > 0.65 ? 'var(--tt-yellow)' : 'var(--tt-cyan)');
         }
 
-        // 5. Diagnostica & Kick Hit Reaction
         if (diagValEl) {
             diagValEl.textContent = String(Math.round((bassEnergy / 255) * 99)).padStart(2, '0');
         }
@@ -331,11 +417,12 @@
             const elapsed = state.audioCtx.currentTime - state.synthStartTime;
             trackTimeEl.textContent = `${formatTime(elapsed)} / LIVE`;
         } else if (audioEl) {
-            trackTimeEl.textContent = `${formatTime(audioEl.currentTime)} / ${formatTime(audioEl.duration || 180)}`;
+            const durText = Number.isFinite(audioEl.duration) ? formatTime(audioEl.duration) : 'STREAM';
+            trackTimeEl.textContent = `${formatTime(audioEl.currentTime)} / ${durText}`;
         }
     }
 
-    function setUIState(mode, trackTitle = 'TECHNO SET', pageCode = '100') {
+    function setUIState(mode, trackTitle = 'TECHNO SET', pageCode = '100', customMarquee = null) {
         const isLive = mode === 'ON AIR';
 
         if (statusEl) {
@@ -346,7 +433,11 @@
         }
 
         if (activePageEl) activePageEl.textContent = pageCode;
-        if (signalModeEl) signalModeEl.textContent = isLive ? (state.usingSynthFallback ? '[SYNTH LIVE]' : '[MP3 STREAM]') : `[${mode}]`;
+        if (signalModeEl) {
+            signalModeEl.textContent = isLive
+                ? (state.usingSynthFallback ? '[SYNTH LIVE]' : '[STREAM ON AIR]')
+                : `[${mode}]`;
+        }
         if (footerStateEl) footerStateEl.textContent = isLive ? `ON AIR // ${trackTitle}` : `AUDIO: ${mode}`;
 
         if (btnPlay) {
@@ -354,20 +445,20 @@
         }
 
         if (marqueeEl) {
-            if (isLive) {
+            if (customMarquee) {
+                marqueeEl.textContent = customMarquee;
+            } else if (isLive) {
                 marqueeEl.textContent = `*** QDG RADIO ON AIR [P${pageCode}]: ${trackTitle} *** CRT AUDIO ENGINE ACTIVE *** STREAMING WEB AUDIO API ***`;
             } else if (mode === 'PAUSED') {
                 marqueeEl.textContent = `*** TRASMISSIONE IN PAUSA [P${pageCode}]: ${trackTitle} *** PREMI PLAY [100] PER RIPRENDERE ***`;
-            } else {
-                marqueeEl.textContent = `*** QDG RADIO STANDBY // SELEZIONA UN CANALE O PREMI PLAY [100] PER AVVIARE LA TRASMISSIONE ***`;
             }
         }
     }
 
     /**
-     * Riproduzione Canale / Traccia
+     * 5. PLAY CHANNEL / STREAM / UPLOADED TRACK
      */
-    async function playTrack(rowEl = null, forceSynth = false) {
+    async function playTrack(rowEl = null, forceSynth = false, customSourceUrl = null, customTitle = null) {
         initAudioEngine();
 
         const targetRow = rowEl || state.activeRow || indexRows[0];
@@ -375,34 +466,42 @@
             state.activeRow.classList.remove('active');
         }
         state.activeRow = targetRow;
-        state.activeRow.classList.add('active');
+        if (state.activeRow) state.activeRow.classList.add('active');
 
-        const title  = targetRow.querySelector('.cat')?.textContent.trim() || 'PIRATE MIX';
-        const page   = targetRow.dataset.page || targetRow.querySelector('.page')?.textContent.trim() || '100';
-        const bpm    = Number(targetRow.dataset.bpm) || 128;
-        const freq   = Number(targetRow.dataset.freq) || 55;
-        const preset = targetRow.dataset.preset || 'pirate';
+        const title  = customTitle || targetRow?.querySelector('.cat')?.textContent.trim() || 'PIRATE MIX';
+        const page   = targetRow?.dataset.page || targetRow?.querySelector('.page')?.textContent.trim() || '100';
+        const bpm    = Number(targetRow?.dataset.bpm) || 128;
+        const freq   = Number(targetRow?.dataset.freq) || 55;
+        const preset = targetRow?.dataset.preset || 'pirate';
+        let streamUrl= customSourceUrl || targetRow?.dataset.stream || 'test-track.mp3';
+
+        if (syncBus && streamUrl && streamUrl.startsWith('idb://')) {
+            const resolved = await syncBus.resolveAudioUrl(streamUrl);
+            if (resolved) streamUrl = resolved;
+        }
 
         state.activePage = page;
 
-        if (!forceSynth) {
+        if (!forceSynth && audioEl) {
             try {
                 stopPirateSynth();
+                if (audioEl.getAttribute('src') !== streamUrl) {
+                    audioEl.src = streamUrl;
+                }
                 await audioEl.play();
                 state.isPlaying = true;
-                setUIState('ON AIR', title, page);
+                setUIState('ON AIR', title, page, syncBus?.getState().marqueeText);
                 if (!state.rafId) state.rafId = requestAnimationFrame(renderVisuals);
                 return;
             } catch (err) {
-                console.info('[QDG RADIO] Autoplay policy fallback: avvio synth Web Audio.');
+                console.info('[QDG RADIO] Stream/Autoplay fallback: avvio synth Web Audio.');
             }
         }
 
-        // Se audio file fallisce o forceSynth = true, genera il synth
-        audioEl.pause();
+        if (audioEl) audioEl.pause();
         state.isPlaying = true;
         startPirateSynth(preset, bpm, freq);
-        setUIState('ON AIR', `${title} (${bpm} BPM)`, page);
+        setUIState('ON AIR', `${title} (${bpm} BPM)`, page, syncBus?.getState().marqueeText);
         if (!state.rafId) state.rafId = requestAnimationFrame(renderVisuals);
     }
 
@@ -448,7 +547,121 @@
     }
 
     /**
-     * Ricerca Diretta Pagina Televideo (Keypad / Tastiera)
+     * 6. APPLY REAL-TIME STATE & LIVE EVENTS FROM P999 ADMIN REGIA
+     */
+    function applyBroadcastStateToUI(bState) {
+        if (!bState) return;
+
+        // 1. Marquee Text
+        if (bState.marqueeText && marqueeEl) {
+            marqueeEl.textContent = bState.marqueeText;
+        }
+
+        // 2. Emergency Alert Banner
+        if (alertBannerEl && bState.alertBanner) {
+            alertBannerEl.style.display = bState.alertBanner.active ? 'flex' : 'none';
+            if (alertTextEl && bState.alertBanner.text) {
+                alertTextEl.textContent = bState.alertBanner.text;
+            }
+        }
+
+        // 3. Custom Channel Names / BPM overrides
+        if (bState.customPages) {
+            Object.entries(bState.customPages).forEach(([pageNum, cfg]) => {
+                const row = indexRows.find((r) => r.dataset.page === pageNum);
+                if (row) {
+                    const catEl = row.querySelector('.cat');
+                    if (catEl && cfg.cat) catEl.textContent = cfg.cat;
+                    if (cfg.bpm) row.dataset.bpm = String(cfg.bpm);
+                }
+            });
+        }
+
+        // 4. Audio Config (EQ & Talkover Ducking)
+        if (bState.audioConfig && state.audioCtx) {
+            const ac = bState.audioConfig;
+            if (typeof ac.eqLow === 'number' && state.eqLow) state.eqLow.gain.value = ac.eqLow;
+            if (typeof ac.eqMid === 'number' && state.eqMid) state.eqMid.gain.value = ac.eqMid;
+            if (typeof ac.eqHigh === 'number' && state.eqHigh) state.eqHigh.gain.value = ac.eqHigh;
+            if (typeof ac.musicGain === 'number' && state.musicGain) {
+                state.musicGain.gain.setTargetAtTime(ac.musicGain, state.audioCtx.currentTime, 0.08);
+            }
+        }
+
+        // 5. Highlight Active Page & Header
+        if (bState.activePage) {
+            state.activePage = bState.activePage;
+            if (activePageEl) activePageEl.textContent = bState.activePage;
+            const matchRow = indexRows.find((r) => r.dataset.page === bState.activePage);
+            if (matchRow) {
+                indexRows.forEach((r) => r.classList.remove('active'));
+                matchRow.classList.add('active');
+                state.activeRow = matchRow;
+            }
+        }
+
+        if (bState.isBroadcasting && bState.nowPlaying) {
+            if (footerStateEl) {
+                footerStateEl.textContent = `ON AIR // ${bState.nowPlaying.title}`;
+            }
+            if (statusEl) {
+                statusEl.textContent = `P${bState.activePage || '100'} RADIOFAX 1 ON AIR`;
+                statusEl.classList.add('bg-red', 't-wht', 'blink');
+            }
+        }
+    }
+
+    if (syncBus) {
+        // Apply initial state from Regia
+        applyBroadcastStateToUI(syncBus.getState());
+
+        // Subscribe to state updates
+        syncBus.onStateChange((newState) => {
+            applyBroadcastStateToUI(newState);
+        });
+
+        // Subscribe to real-time Regia broadcast events
+        syncBus.onEvent(async (eventName, payload) => {
+            if (eventName === 'PLAY_TRACK' && payload.track) {
+                const trk = payload.track;
+                const matchRow = indexRows.find((r) => r.dataset.page === payload.page) || state.activeRow;
+                await playTrack(matchRow, trk.sourceType === 'synth', trk.url, trk.title);
+            } else if (eventName === 'PLAY_STREAM' && payload.url) {
+                const matchRow = indexRows.find((r) => r.dataset.page === payload.page) || state.activeRow;
+                await playTrack(matchRow, false, payload.url, payload.title);
+            } else if (eventName === 'PLAY_SYNTH') {
+                const matchRow = indexRows.find((r) => r.dataset.page === payload.page) || state.activeRow;
+                if (matchRow) {
+                    matchRow.dataset.preset = payload.preset;
+                    matchRow.dataset.bpm = String(payload.bpm);
+                    matchRow.dataset.freq = String(payload.freq);
+                }
+                await playTrack(matchRow, true, null, payload.title);
+            } else if (eventName === 'PAUSE_BROADCAST') {
+                pauseTrack();
+            } else if (eventName === 'STOP_BROADCAST' || eventName === 'BROADCAST_STOPPED') {
+                stopTrack();
+            } else if (eventName === 'SEEK_TRACK' && audioEl && typeof payload.currentTime === 'number') {
+                audioEl.currentTime = payload.currentTime;
+            } else if (eventName === 'TRIGGER_JINGLE' && payload.jingleType) {
+                playReceivedJingle(payload.jingleType);
+            } else if (eventName === 'CRT_GLITCH' && crtScreenEl) {
+                crtScreenEl.classList.remove('crt-glitch-pulse');
+                void crtScreenEl.offsetWidth;
+                crtScreenEl.classList.add('crt-glitch-pulse');
+            } else if (eventName === 'MIC_AUDIO_CHUNK' && payload.dataUrl) {
+                // Play live DJ microphone voice packet
+                try {
+                    const micAudio = new Audio(payload.dataUrl);
+                    micAudio.volume = state.isMuted ? 0 : state.volume;
+                    micAudio.play().catch(() => {});
+                } catch (_) {}
+            }
+        });
+    }
+
+    /**
+     * 7. TELETEXT REMOTE KEYPAD (Dial 999 for Admin Studio!)
      */
     function dialDigit(digit) {
         state.dialBuffer += digit;
@@ -472,6 +685,12 @@
     }
 
     function jumpToPage(pageStr) {
+        // Page 999 opens the Admin Broadcast Studio!
+        if (pageStr === '999') {
+            window.location.href = 'admin.html';
+            return;
+        }
+
         const foundRow = indexRows.find((r) => (r.dataset.page || '').startsWith(pageStr) || r.querySelector('.page')?.textContent.includes(pageStr));
         if (foundRow) {
             playTrack(foundRow, state.usingSynthFallback);
@@ -483,7 +702,7 @@
         }
     }
 
-    // Event Listeners Canali & Righe Indice
+    // Event Listeners
     indexRows.forEach((row) => {
         row.addEventListener('click', () => {
             if (state.activeRow === row && state.isPlaying) {
@@ -500,12 +719,16 @@
         });
     });
 
-    // Fastext Keys
     btnPlay?.addEventListener('click', () => {
         if (state.isPlaying) {
             pauseTrack();
         } else {
-            playTrack(state.activeRow || indexRows[0], false);
+            const st = syncBus?.getState();
+            if (st && st.isBroadcasting && st.nowPlaying) {
+                playTrack(state.activeRow || indexRows[0], st.nowPlaying.sourceType === 'synth', st.nowPlaying.url, st.nowPlaying.title);
+            } else {
+                playTrack(state.activeRow || indexRows[0], false);
+            }
         }
     });
 
@@ -522,7 +745,6 @@
         playTrack(row, true);
     });
 
-    // Volume Controls
     btnVolDown?.addEventListener('click', () => setVolume(state.volume - 0.1));
     btnVolUp?.addEventListener('click',   () => setVolume(state.volume + 0.1));
     btnMute?.addEventListener('click', () => {
@@ -533,14 +755,12 @@
         }
     });
 
-    // Telecomando Numerico (Pulsanti 0-9)
     document.querySelectorAll('.num-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
             dialDigit(btn.dataset.key);
         });
     });
 
-    // Scorciatoie da Tastiera
     window.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
@@ -564,14 +784,12 @@
         }
     });
 
-    // Audio Element Event Listeners
     if (audioEl) {
         audioEl.addEventListener('timeupdate', syncTrackTimer);
         audioEl.addEventListener('loadedmetadata', syncTrackTimer);
         audioEl.addEventListener('ended', stopTrack);
     }
 
-    // Orologio Teletext Italiano
     const DAYS = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
     const MONTHS = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
     function tickClock() {

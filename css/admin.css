@@ -1,0 +1,1025 @@
+/* ============================================================================
+   P999 REGIA CENTRALE // QDG RADIO MASTER CONTROL ROOM (css/admin.css)
+   Broadcast Engineering Rack & Teletext CRT Studio Styling
+   ============================================================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --tt-black: #05060a;
+    --tt-panel: #0b0d14;
+    --tt-border: #1e2942;
+    --tt-blue: #0000ee;
+    --tt-cyan: #00ffff;
+    --tt-yellow: #ffff00;
+    --tt-green: #00ff00;
+    --tt-red: #ff1e1e;
+    --tt-magenta: #ff00ff;
+    --tt-white: #f8fafc;
+    --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+    --font-tt: 'VT323', monospace;
+}
+
+body.admin-body {
+    background-color: var(--tt-black);
+    color: var(--tt-white);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 12px 16px 36px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Subtle CRT Engineering Scanlines */
+body.admin-body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* ============================================================================
+   MODAL PIN SECURITY GATE
+   ============================================================================ */
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.auth-box {
+    max-width: 440px;
+    width: 100%;
+    background: #080a12;
+    border: 2px solid var(--tt-blue);
+    box-shadow: 0 0 40px rgba(0, 0, 238, 0.4);
+    padding: 24px;
+    text-align: center;
+}
+
+.auth-header {
+    background: var(--tt-blue);
+    color: var(--tt-yellow);
+    font-family: var(--font-tt);
+    font-size: 28px;
+    padding: 4px 10px;
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+}
+
+.auth-desc {
+    color: var(--tt-cyan);
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.auth-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.auth-form input {
+    flex: 1;
+    background: #000;
+    border: 1px solid var(--tt-cyan);
+    color: var(--tt-yellow);
+    font-family: var(--font-tt);
+    font-size: 26px;
+    text-align: center;
+    padding: 6px;
+    letter-spacing: 4px;
+}
+
+.btn-auth-submit {
+    background: var(--tt-green);
+    color: #000;
+    border: none;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    padding: 0 16px;
+    cursor: pointer;
+}
+
+.auth-hint {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* ============================================================================
+   STUDIO HEADER BAR
+   ============================================================================ */
+.studio-header {
+    max-width: 1440px;
+    margin: 0 auto 16px;
+    background: #090b12;
+    border: 2px solid var(--tt-blue);
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.studio-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.on-air-lamp {
+    font-family: var(--font-tt);
+    font-size: 28px;
+    font-weight: bold;
+    padding: 4px 16px;
+    background: #1e2028;
+    color: #64748b;
+    border: 2px solid #334155;
+    letter-spacing: 2px;
+    transition: all 0.15s ease;
+}
+
+.on-air-lamp.live {
+    background: var(--tt-red);
+    color: #ffffff;
+    border-color: var(--tt-yellow);
+    box-shadow: 0 0 22px rgba(255, 30, 30, 0.85);
+    animation: lamp-pulse 1s infinite alternate;
+}
+
+@keyframes lamp-pulse {
+    from { filter: brightness(0.92); }
+    to   { filter: brightness(1.18); }
+}
+
+.studio-title-block h1 {
+    font-family: var(--font-tt);
+    font-size: 30px;
+    color: var(--tt-yellow);
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.studio-sub {
+    font-size: 12px;
+    color: var(--tt-cyan);
+    margin-top: 3px;
+}
+
+.studio-telemetry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.telemetry-box {
+    background: #040508;
+    border: 1px solid #1e293b;
+    padding: 4px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.telemetry-box .t-label {
+    font-size: 10px;
+    color: #94a3b8;
+}
+
+.telemetry-box .t-val {
+    font-family: var(--font-tt);
+    font-size: 22px;
+    color: var(--tt-green);
+    line-height: 1;
+}
+
+.telemetry-box .t-val.cyan { color: var(--tt-cyan); }
+.telemetry-box .t-val.yellow { color: var(--tt-yellow); }
+
+.btn-open-listener {
+    background: var(--tt-blue);
+    color: var(--tt-yellow);
+    text-decoration: none;
+    font-family: var(--font-tt);
+    font-size: 22px;
+    padding: 6px 14px;
+    border: 1px solid var(--tt-cyan);
+    transition: filter 0.15s;
+}
+
+.btn-open-listener:hover {
+    filter: brightness(1.25);
+}
+
+.btn-lock-console {
+    background: #111827;
+    border: 1px solid #374151;
+    color: #fff;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+/* ============================================================================
+   MAIN 2x2 RACK GRID
+   ============================================================================ */
+.studio-grid {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.rack-card {
+    background: var(--tt-panel);
+    border: 2px solid #1e2b48;
+    display: flex;
+    flex-direction: column;
+}
+
+.rack-header {
+    background: var(--tt-blue);
+    color: var(--tt-white);
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-tt);
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+.rack-num {
+    color: var(--tt-yellow);
+}
+
+.rack-status {
+    color: var(--tt-cyan);
+    font-size: 18px;
+}
+
+.rack-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+/* ============================================================================
+   RACK 01: TRANSMITTER & SOURCE ROUTING
+   ============================================================================ */
+.master-tx-bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+.btn-master-broadcast {
+    background: linear-gradient(180deg, #16a34a 0%, #14532d 100%);
+    color: #ffffff;
+    border: 2px solid var(--tt-green);
+    padding: 12px 16px;
+    font-family: var(--font-tt);
+    font-size: 26px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.15s ease;
+}
+
+.btn-master-broadcast.active {
+    background: linear-gradient(180deg, #dc2626 0%, #7f1d1d 100%);
+    border-color: var(--tt-yellow);
+    box-shadow: 0 0 20px rgba(255, 30, 30, 0.55);
+}
+
+.btn-rec-broadcast {
+    background: #18181b;
+    color: #f87171;
+    border: 2px solid #7f1d1d;
+    padding: 0 16px;
+    font-family: var(--font-tt);
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.btn-rec-broadcast.recording {
+    background: var(--tt-red);
+    color: #fff;
+    border-color: #fff;
+    animation: lamp-pulse 0.6s infinite alternate;
+}
+
+.source-mode-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.source-tab {
+    background: #111522;
+    color: #94a3b8;
+    border: 1px solid #283552;
+    padding: 8px 6px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+}
+
+.source-tab.active {
+    background: #0000aa;
+    color: var(--tt-yellow);
+    border-color: var(--tt-cyan);
+}
+
+.source-panel {
+    display: none;
+    background: #06080e;
+    border: 1px solid #1e293b;
+    padding: 12px;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.source-panel.active {
+    display: flex;
+}
+
+/* AutoDJ Deck Panel */
+.now-playing-deck {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #030407;
+    border-left: 4px solid var(--tt-cyan);
+    padding: 8px 12px;
+}
+
+.np-tag {
+    font-size: 10px;
+    color: var(--tt-cyan);
+}
+
+.np-title {
+    font-family: var(--font-tt);
+    font-size: 25px;
+    color: var(--tt-yellow);
+}
+
+.np-meta {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.np-time-box {
+    font-family: var(--font-tt);
+    font-size: 26px;
+    color: var(--tt-green);
+}
+
+.deck-progress-wrap input[type="range"] {
+    width: 100%;
+    accent-color: var(--tt-cyan);
+    cursor: pointer;
+}
+
+.deck-transport-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.deck-btn {
+    padding: 7px 14px;
+    font-family: var(--font-tt);
+    font-size: 21px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.deck-btn.play { background: var(--tt-green); color: #000; }
+.deck-btn.stop { background: var(--tt-red); color: #fff; }
+.deck-btn.prev, .deck-btn.next { background: var(--tt-yellow); color: #000; }
+
+.autodj-loop-toggle {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--tt-cyan);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+/* External Stream Panel */
+.stream-input-group label,
+.stream-presets-label {
+    font-size: 11px;
+    color: var(--tt-cyan);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stream-url-row {
+    display: flex;
+    gap: 8px;
+}
+
+.stream-url-row input {
+    flex: 1;
+    background: #000;
+    border: 1px solid #334155;
+    color: var(--tt-yellow);
+    font-family: var(--font-mono);
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.btn-launch-stream {
+    background: var(--tt-cyan);
+    color: #000;
+    border: none;
+    padding: 0 14px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.stream-presets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.preset-stream-btn {
+    background: #111625;
+    border: 1px solid #283655;
+    color: #e2e8f0;
+    padding: 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.preset-stream-btn:hover {
+    background: var(--tt-blue);
+    color: var(--tt-yellow);
+    border-color: var(--tt-yellow);
+}
+
+/* Live Mic Panel */
+.mic-device-bar {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.mic-device-bar select {
+    flex: 1;
+    background: #000;
+    color: var(--tt-white);
+    border: 1px solid #334155;
+    padding: 7px;
+    font-family: var(--font-mono);
+}
+
+.btn-refresh-devices {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #fff;
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+.mic-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.btn-mic-toggle,
+.btn-talkover {
+    padding: 10px;
+    font-family: var(--font-tt);
+    font-size: 22px;
+    background: #181c29;
+    color: #e2e8f0;
+    border: 1px solid #3b4968;
+    cursor: pointer;
+}
+
+.btn-mic-toggle.active {
+    background: var(--tt-red);
+    color: #fff;
+    border-color: var(--tt-yellow);
+}
+
+.btn-talkover.active {
+    background: var(--tt-yellow);
+    color: #000;
+}
+
+.mic-live-hint {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.4;
+}
+
+/* Synth Panel */
+.synth-controls-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 10px;
+}
+
+.synth-col {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--tt-cyan);
+}
+
+.synth-col select {
+    background: #000;
+    color: var(--tt-yellow);
+    border: 1px solid #334155;
+    padding: 6px;
+    font-family: var(--font-mono);
+}
+
+.btn-trigger-synth {
+    background: var(--tt-magenta);
+    color: #000;
+    border: none;
+    padding: 10px;
+    font-family: var(--font-tt);
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ============================================================================
+   RACK 02: MIXER, VU METERS, 3-BAND EQ & JINGLE CART PADS
+   ============================================================================ */
+.local-monitor-toggle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--tt-yellow);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.studio-meters-box {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 12px;
+    background: #040508;
+    border: 1px solid #1e293b;
+    padding: 10px;
+    align-items: center;
+}
+
+.studio-vu-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vu-ch-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vu-lbl {
+    width: 14px;
+    font-weight: bold;
+    color: var(--tt-cyan);
+}
+
+.vu-bar-track {
+    flex: 1;
+    height: 12px;
+    background: #11131a;
+    border: 1px solid #262936;
+    overflow: hidden;
+}
+
+.vu-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00ff00 0%, #00ff00 65%, #ffff00 82%, #ff0000 100%);
+    transition: width 0.04s linear;
+}
+
+.vu-db-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.vu-db-row strong {
+    color: var(--tt-cyan);
+}
+
+.studio-scope-wrap {
+    border: 1px solid var(--tt-blue);
+    background: #020306;
+    height: 68px;
+}
+
+#admin-scope-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.faders-and-eq-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    background: #06080f;
+    border: 1px solid #1e293b;
+    padding: 10px;
+}
+
+.fader-strip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--tt-yellow);
+    text-align: center;
+}
+
+.fader-strip.eq {
+    color: var(--tt-cyan);
+}
+
+.fader-strip input[type="range"] {
+    width: 100%;
+    accent-color: var(--tt-yellow);
+    cursor: pointer;
+}
+
+.fader-strip.eq input[type="range"] {
+    accent-color: var(--tt-cyan);
+}
+
+.fader-strip span {
+    font-family: var(--font-tt);
+    font-size: 18px;
+    color: var(--tt-white);
+}
+
+.jingle-section-title {
+    font-size: 11px;
+    color: var(--tt-cyan);
+}
+
+.jingle-pads-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.jingle-pad {
+    background: #111624;
+    border: 1px solid #2e3d5c;
+    color: var(--tt-white);
+    padding: 9px 6px;
+    font-family: var(--font-tt);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.08s ease;
+}
+
+.jingle-pad:hover {
+    background: var(--tt-blue);
+    color: var(--tt-yellow);
+    border-color: var(--tt-cyan);
+}
+
+.jingle-pad:active {
+    background: var(--tt-yellow);
+    color: #000;
+    transform: translateY(2px);
+}
+
+.jingle-pad.glitch-pad {
+    border-color: var(--tt-magenta);
+    color: var(--tt-magenta);
+}
+
+/* ============================================================================
+   RACK 03: PLAYLIST & MP3 FILE UPLOADER
+   ============================================================================ */
+.upload-dropzone {
+    border: 2px dashed var(--tt-cyan);
+    background: rgba(0, 255, 255, 0.04);
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone.dragover {
+    background: rgba(0, 255, 255, 0.12);
+    border-color: var(--tt-yellow);
+}
+
+.dropzone-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.drop-icon {
+    font-size: 24px;
+}
+
+.drop-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.drop-text strong {
+    color: var(--tt-yellow);
+    font-size: 12.5px;
+}
+
+.drop-text span {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.btn-browse-files {
+    background: var(--tt-cyan);
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.add-stream-form {
+    display: grid;
+    grid-template-columns: 1.3fr 85px 68px 1.4fr auto;
+    gap: 6px;
+}
+
+.add-stream-form input {
+    background: #000;
+    border: 1px solid #334155;
+    color: var(--tt-white);
+    padding: 6px 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.btn-add-trk {
+    background: var(--tt-green);
+    color: #000;
+    border: none;
+    padding: 0 12px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.playlist-items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 225px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.pl-row {
+    display: grid;
+    grid-template-columns: 48px 1fr auto auto auto;
+    align-items: center;
+    gap: 8px;
+    background: #06080e;
+    border: 1px solid #1e293b;
+    padding: 6px 10px;
+}
+
+.pl-row.active {
+    background: rgba(0, 0, 238, 0.35);
+    border-color: var(--tt-yellow);
+}
+
+.pl-page-badge {
+    background: var(--tt-blue);
+    color: var(--tt-yellow);
+    font-family: var(--font-tt);
+    font-size: 20px;
+    text-align: center;
+    padding: 1px 4px;
+}
+
+.pl-meta {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pl-title {
+    color: var(--tt-white);
+    font-weight: bold;
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pl-sub {
+    color: #94a3b8;
+    font-size: 10.5px;
+}
+
+.pl-type-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    background: #111827;
+    color: var(--tt-cyan);
+    border: 1px solid #334155;
+}
+
+.btn-pl-air {
+    background: var(--tt-green);
+    color: #000;
+    border: none;
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-pl-del {
+    background: #271215;
+    color: #f87171;
+    border: 1px solid #7f1d1d;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+/* ============================================================================
+   RACK 04: TELEVIDEO CMS & BREAKING NEWS TICKER
+   ============================================================================ */
+.cms-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cms-group label {
+    font-size: 11px;
+    color: var(--tt-cyan);
+}
+
+.cms-row {
+    display: flex;
+    gap: 6px;
+}
+
+.cms-group input,
+.cms-group select {
+    background: #000;
+    border: 1px solid #334155;
+    color: var(--tt-yellow);
+    padding: 7px 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    flex: 1;
+}
+
+.btn-cms-push {
+    background: var(--tt-yellow);
+    color: #000;
+    border: none;
+    padding: 0 14px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.marquee-quick-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.mq-pill {
+    background: #111624;
+    border: 1px solid #2b3954;
+    color: #cbd5e1;
+    padding: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.mq-pill:hover {
+    border-color: var(--tt-green);
+    color: var(--tt-green);
+}
+
+.cms-grid-2 {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 10px;
+}
+
+.emergency-box {
+    background: rgba(255, 0, 0, 0.08);
+    border: 1px solid #991b1b;
+    padding: 8px 10px;
+}
+
+.em-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.btn-toggle-alert {
+    background: #1f2937;
+    color: #f87171;
+    border: 1px solid #ef4444;
+    padding: 3px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-toggle-alert.active {
+    background: var(--tt-red);
+    color: #fff;
+}
+
+.channel-editor-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 1080px) {
+    .studio-grid {
+        grid-template-columns: 1fr;
+    }
+    .add-stream-form {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .source-mode-tabs {
+        grid-template-columns: 1fr 1fr;
+    }
+    .faders-and-eq-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .cms-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}

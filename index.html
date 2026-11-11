@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>QDG RADIO // TELEVIDEO ARCHIVE // CRT WEB RADIO</title>
-<meta name="description" content="QDG Radio - Stazione Web Radio e Archivio Mixati con interfaccia Televideo / Teletext CRT anni '80/'90, Web Audio API e Visualizer in tempo reale.">
+<meta name="description" content="QDG Radio - Stazione Web Radio e Archivio Mixati con interfaccia Televideo / Teletext CRT anni '80/'90, Web Audio API, Streaming Live e Regia di Trasmissione P999.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -17,6 +17,13 @@
 
 <!-- SCHERMO CRT TELEVIDEO -->
 <main class="televideo-screen" id="crt-screen">
+
+    <!-- BANNER EDIZIONE STRAORDINARIA DALLA REGIA (P999) -->
+    <div class="tx-alert-banner" id="tx-alert-banner" style="display: none;">
+        <span class="blink">⚡</span>
+        <span id="tx-alert-text">EDIZIONE STRAORDINARIA // TRASMISSIONE SPECIALE DALLA REGIA QDG RADIO</span>
+        <span class="blink">⚡</span>
+    </div>
 
     <!-- RIGA SUPERIORE STANDARD TELETEXT -->
     <header class="header-top t-yel">
@@ -35,9 +42,9 @@
     </div>
 
     <!-- SOTTOTITOLO DOUBLE HEIGHT -->
-    <div class="sub-network t-yel">QDG RADIO NETWORK // PIRATE CRT BROADCAST</div>
+    <div class="sub-network t-yel" id="tx-sub-network">QDG RADIO NETWORK // PIRATE CRT BROADCAST</div>
     <div class="double-height t-wht">
-        <span>ARCHIVIO MIXATI &amp; STREAMING DIRETTA</span>
+        <span id="tx-headline-text">ARCHIVIO MIXATI &amp; STREAMING DIRETTA</span>
         <span class="t-yel page-badge" id="active-page-num">170</span>
     </div>
 
@@ -67,16 +74,16 @@
 
             <div class="cyan-break">Il nuovo set Balearic Beats e' disponibile online</div>
 
-            <div class="index-row" data-page="500" data-bpm="135" data-freq="55" data-preset="techno" tabindex="0">
+            <div class="index-row" data-page="500" data-bpm="135" data-freq="55" data-preset="techno" data-stream="https://ice1.somafm.com/defcon-128-mp3" tabindex="0">
                 <span class="cat">TECHNO BEATS</span> <span class="page">500</span>
             </div>
-            <div class="index-row" data-page="540" data-bpm="130" data-freq="60" data-preset="detroit" tabindex="0">
+            <div class="index-row" data-page="540" data-bpm="130" data-freq="60" data-preset="detroit" data-stream="https://ice1.somafm.com/beatblender-128-mp3" tabindex="0">
                 <span class="cat">DETROIT 90S</span> <span class="page">540</span>
             </div>
-            <div class="index-row" data-page="200" data-bpm="110" data-freq="42" data-preset="ambient" tabindex="0">
+            <div class="index-row" data-page="200" data-bpm="110" data-freq="42" data-preset="ambient" data-stream="https://ice1.somafm.com/dronezone-128-mp3" tabindex="0">
                 <span class="cat">AMBIENT <span class="t-wht">MIX1</span></span> <span class="page">200</span>
             </div>
-            <div class="index-row" data-page="550" data-bpm="118" data-freq="49" data-preset="vapor" tabindex="0">
+            <div class="index-row" data-page="550" data-bpm="118" data-freq="49" data-preset="vapor" data-stream="https://stream.nightride.fm/nightride.m4a" tabindex="0">
                 <span class="cat">VAPORWAVE</span> <span class="page">550</span>
             </div>
 
@@ -152,7 +159,7 @@
             <svg viewBox="0 0 260 54" preserveAspectRatio="none">
                 <path id="osc-path" d="M 0 27 L 260 27"></path>
             </svg>
-            <span class="osc-tag">CRT 44.1kHz</span>
+            <span class="osc-tag" id="osc-mode-tag">CRT 44.1kHz</span>
         </div>
     </section>
 
@@ -181,7 +188,7 @@
 
     <!-- FOOTER E BOTTONI FASTEXT -->
     <footer class="footer-bar">
-        <span class="footer-slogan">Radiofax: La scena underground sulla tua tastiera</span>
+        <span class="footer-slogan" id="footer-slogan-text">Radiofax: La scena underground sulla tua tastiera</span>
         <span id="footer-state" class="t-yel">AUDIO: READY</span>
     </footer>
 
@@ -198,10 +205,14 @@
         <button type="button" id="btn-synth" class="f-key t-cya btn-synth-outline">
             SYNTH LIVE 199
         </button>
+        <a href="admin.html" class="f-key btn-admin-regia" title="Apri Regia di Trasmissione (Pagina 999)">
+            🎛️ REGIA 999
+        </a>
     </nav>
 
 </main>
 
+<script src="js/radio-sync.js"></script>
 <script src="js/televideo.js"></script>
 </body>
 </html>

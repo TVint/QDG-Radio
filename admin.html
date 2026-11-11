@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P999 REGIA CENTRALE // QDG RADIO BROADCAST STUDIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+<!-- ==========================================================================
+     MODAL ACCESSO REGIA (PIN DI SICUREZZA - DEFAULT: 1984)
+     ========================================================================== -->
+<div class="auth-overlay" id="auth-overlay" style="display: none;">
+    <div class="auth-box">
+        <div class="auth-header">P999 // ACCESSO REGIA DI TRASMISSIONE</div>
+        <p class="auth-desc">INSERISCI IL CODICE OPERATORE PER SBLOCCARE IL TRASMETTITORE QDG RADIO</p>
+        <form id="auth-form" class="auth-form">
+            <input type="password" id="auth-pin" value="1984" maxlength="8" placeholder="PIN (1984)" autocomplete="off">
+            <button type="submit" class="btn-auth-submit">🔓 SBLOCCA CONSOLE [1984]</button>
+        </form>
+        <div class="auth-hint">PIN Predefinito: <strong>1984</strong> (Precompilato per accesso rapido)</div>
+    </div>
+</div>
+
+<!-- SORGENTE AUDIO MONITOR DI REGIA -->
+<audio id="admin-deck-player" src="test-track.mp3" crossorigin="anonymous" preload="auto" style="display:none;"></audio>
+
+<!-- ==========================================================================
+     TOP BROADCAST ENGINEERING HEADER
+     ========================================================================== -->
+<header class="studio-header">
+    <div class="studio-brand">
+        <div class="on-air-lamp" id="master-onair-lamp">OFF AIR</div>
+        <div class="studio-title-block">
+            <h1>P999 // QDG RADIO MASTER CONTROL ROOM</h1>
+            <div class="studio-sub" id="studio-sub-status">SISTEMA DI TRASMISSIONE TELETEXT CRT // BUS DI SINCRONIZZAZIONE ATTIVO</div>
+        </div>
+    </div>
+
+    <div class="studio-telemetry">
+        <div class="telemetry-box">
+            <span class="t-label">UPTIME DIRETTA</span>
+            <span class="t-val" id="uptime-clock">00:00:00</span>
+        </div>
+        <div class="telemetry-box">
+            <span class="t-label">SORGENTE ATTIVA</span>
+            <span class="t-val cyan" id="active-source-badge">AUTODJ DECK</span>
+        </div>
+        <div class="telemetry-box">
+            <span class="t-label">STREAM BITRATE</span>
+            <span class="t-val yellow" id="bitrate-badge">192 kbps</span>
+        </div>
+        <a href="index.html" target="_blank" class="btn-open-listener" title="Apre la pagina ascoltatore Televideo in una nuova scheda">
+            📺 APRI MONITOR ASCOLTATORE (P100) ↗
+        </a>
+        <button type="button" class="btn-lock-console" id="btn-lock-console" title="Blocca Regia">🔒</button>
+    </div>
+</header>
+
+<!-- ==========================================================================
+     MAIN BROADCAST STUDIO GRID (4 RACK MODULES)
+     ========================================================================== -->
+<main class="studio-grid">
+
+    <!-- ======================================================================
+         RACK 01: TRASMETTITORE PRINCIPALE & ROUTING SORGENTI STREAMING
+         ====================================================================== -->
+    <section class="rack-card transmitter-rack">
+        <div class="rack-header">
+            <span class="rack-num">RACK 01 // TRASMETTITORE &amp; SORGENTE DI FLUSSO</span>
+            <span class="rack-status" id="tx-sync-indicator">● SYNC REAL-TIME OK</span>
+        </div>
+
+        <div class="rack-body">
+            <!-- PULSANTE PRINCIPALE VAI IN ONDA / STOP -->
+            <div class="master-tx-bar">
+                <button type="button" class="btn-master-broadcast" id="btn-master-broadcast">
+                    <span class="tx-icon">📡</span>
+                    <span class="tx-text" id="btn-master-tx-text">AVVIA STREAMING IN ONDA (START TX)</span>
+                </button>
+
+                <button type="button" class="btn-rec-broadcast" id="btn-rec-broadcast" title="Registra l'intero flusso audio trasmesso in un file audio scaricabile">
+                    🔴 REC MASTER
+                </button>
+            </div>
+
+            <!-- SELETTORE DELLE 4 MODALITÀ DI TRASMISSIONE -->
+            <div class="source-mode-tabs" role="tablist">
+                <button type="button" class="source-tab active" data-mode="autodj" id="tab-mode-autodj">
+                    💿 1. AUTODJ / PLAYLIST
+                </button>
+                <button type="button" class="source-tab" data-mode="stream" id="tab-mode-stream">
+                    🌐 2. STREAM URL ESTERNO
+                </button>
+                <button type="button" class="source-tab" data-mode="live_mic" id="tab-mode-mic">
+                    🎙️ 3. LIVE MIC / SCHEDA AUDIO
+                </button>
+                <button type="button" class="source-tab" data-mode="synth" id="tab-mode-synth">
+                    🎹 4. SYNTH GENERATIVO
+                </button>
+            </div>
+
+            <!-- PANNELLO A: DECK AUTODJ & TRACCIA ATTUALE -->
+            <div class="source-panel active" id="panel-source-autodj">
+                <div class="now-playing-deck">
+                    <div class="np-info">
+                        <div class="np-tag">IN ONDA SUL DECK PRINCIPALE:</div>
+                        <div class="np-title" id="deck-track-title">A Z INDEX // QDG PIRATE MIX</div>
+                        <div class="np-meta" id="deck-track-meta">PAGINA P100 · 128 BPM · FILE LOCALE</div>
+                    </div>
+                    <div class="np-time-box">
+                        <span id="deck-time-cur">00:00</span> / <span id="deck-time-dur">03:12</span>
+                    </div>
+                </div>
+
+                <!-- Barra di Avanzamento Traccia (Scrubbable) -->
+                <div class="deck-progress-wrap">
+                    <input type="range" id="deck-seek-slider" min="0" max="100" step="0.1" value="0" aria-label="Posizione Traccia">
+                </div>
+
+                <!-- Controlli Trasporto Deck -->
+                <div class="deck-transport-row">
+                    <button type="button" class="deck-btn play" id="btn-deck-play">► PLAY / PAUSE</button>
+                    <button type="button" class="deck-btn stop" id="btn-deck-stop">■ STOP</button>
+                    <button type="button" class="deck-btn prev" id="btn-deck-prev">⏮ PREV</button>
+                    <button type="button" class="deck-btn next" id="btn-deck-next">⏭ NEXT</button>
+                    <label class="autodj-loop-toggle">
+                        <input type="checkbox" id="chk-autodj-next" checked> AUTO-ADVANCE 24/7
+                    </label>
+                </div>
+            </div>
+
+            <!-- PANNELLO B: RELAY STREAMING ESTERNO (ICECAST / SHOUTCAST / MP3 / HLS) -->
+            <div class="source-panel" id="panel-source-stream">
+                <div class="stream-input-group">
+                    <label for="input-stream-url">URL FLUSSO STREAMING (ICECAST / SHOUTCAST / MP3 / AAC / OGG):</label>
+                    <div class="stream-url-row">
+                        <input type="url" id="input-stream-url" value="https://ice1.somafm.com/defcon-128-mp3" placeholder="https://tuo-server-icecast:8000/stream.mp3">
+                        <button type="button" class="btn-launch-stream" id="btn-connect-stream">📡 AGGANCIA STREAM</button>
+                    </div>
+                </div>
+
+                <div class="stream-presets-label">FLUSSI RADIO LIVE PRECONFIGURATI (1-CLICK RELAY):</div>
+                <div class="stream-presets-grid">
+                    <button type="button" class="preset-stream-btn" data-url="https://ice1.somafm.com/defcon-128-mp3" data-title="DEFCON HACKER RADIO" data-page="500" data-bpm="135">
+                        🛰️ SOMAFM DEFCON (128k MP3)
+                    </button>
+                    <button type="button" class="preset-stream-btn" data-url="https://stream.nightride.fm/nightride.m4a" data-title="NIGHTRIDE FM SYNTHWAVE" data-page="550" data-bpm="118">
+                        🌆 NIGHTRIDE FM (SYNTHWAVE)
+                    </button>
+                    <button type="button" class="preset-stream-btn" data-url="https://ice1.somafm.com/dronezone-128-mp3" data-title="DRONE ZONE AMBIENT" data-page="200" data-bpm="105">
+                        🌌 DRONE ZONE (AMBIENT)
+                    </button>
+                    <button type="button" class="preset-stream-btn" data-url="https://ice1.somafm.com/beatblender-128-mp3" data-title="BEAT BLENDER DETROIT" data-page="540" data-bpm="128">
+                        🎛️ BEAT BLENDER (DEEP CLUB)
+                    </button>
+                </div>
+            </div>
+
+            <!-- PANNELLO C: LIVE MICROFONO / INGRESSO SCHEDA AUDIO ESTERNA -->
+            <div class="source-panel" id="panel-source-mic">
+                <div class="mic-Select-row">
+                    <label for="select-audio-input">INGRESSO AUDIO (MICROFONO / MIXER ESTERNO USB):</label>
+                    <div class="mic-device-bar">
+                        <select id="select-audio-input">
+                            <option value="default">Ingresso Audio Predefinito di Sistema</option>
+                        </select>
+                        <button type="button" class="btn-refresh-devices" id="btn-refresh-mic" title="Aggiorna periferiche audio">🔄</button>
+                    </div>
+                </div>
+
+                <div class="mic-actions-grid">
+                    <button type="button" class="btn-mic-toggle" id="btn-mic-toggle">
+                        🎙️ ATTIVA MICROFONO IN DIRETTA
+                    </button>
+                    <button type="button" class="btn-talkover" id="btn-talkover">
+                        🗣️ TALKOVER (AUTO-DUCK MUSICA -12dB)
+                    </button>
+                </div>
+
+                <div class="mic-live-hint" id="mic-status-text">
+                    Stato Microfono: <strong>DISATTIVATO</strong> — Quando attivo, la tua voce viene mixata sul bus master e trasmessa in tempo reale agli ascoltatori collegati.
+                </div>
+            </div>
+
+            <!-- PANNELLO D: SINTETIZZATORE GENERATIVO LIVE (909/303 ENGINE) -->
+            <div class="source-panel" id="panel-source-synth">
+                <div class="synth-controls-grid">
+                    <div class="synth-col">
+                        <label for="select-synth-preset">PRESET GENERATIVO:</label>
+                        <select id="select-synth-preset">
+                            <option value="pirate">PIRATE TECHNO (P100)</option>
+                            <option value="techno">TECHNO BEATS 909 (P500)</option>
+                            <option value="detroit">DETROIT 90S (P540)</option>
+                            <option value="acid">ACID 303 SQUELCH (P777)</option>
+                            <option value="ambient">DEEP AMBIENT (P200)</option>
+                            <option value="glitch">GLITCH IDM (P570)</option>
+                            <option value="vapor">VAPORWAVE CRT (P550)</option>
+                        </select>
+                    </div>
+                    <div class="synth-col">
+                        <label for="synth-bpm-slider">TEMPO BPM: <strong id="lbl-synth-bpm">128</strong></label>
+                        <input type="range" id="synth-bpm-slider" min="90" max="160" value="128">
+                    </div>
+                    <div class="synth-col">
+                        <label for="synth-freq-slider">ROOT FREQ: <strong id="lbl-synth-freq">55 Hz</strong></label>
+                        <input type="range" id="synth-freq-slider" min="36" max="110" value="55">
+                    </div>
+                </div>
+                <button type="button" class="btn-trigger-synth" id="btn-launch-synth">
+                    🎹 LANCIA SEQUENCER GENERATIVO IN ONDA
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         RACK 02: BANCO MIXER, EQUALIZZATORE 3-BANDE, VU METER & JINGLE PADS
+         ====================================================================== -->
+    <section class="rack-card mixer-rack">
+        <div class="rack-header">
+            <span class="rack-num">RACK 02 // BANCO MIXER, EQ BROADCAST &amp; JINGLE CART</span>
+            <label class="local-monitor-toggle">
+                <input type="checkbox" id="chk-studio-monitor" checked> 🎧 AUDIO MONITOR IN STUDIO
+            </label>
+        </div>
+
+        <div class="rack-body">
+            <!-- OSCILLOSCOPIO E PEAK METER DI REGIA -->
+            <div class="studio-meters-box">
+                <div class="studio-vu-bars">
+                    <div class="vu-ch-row">
+                        <span class="vu-lbl">L</span>
+                        <div class="vu-bar-track"><div class="vu-bar-fill" id="admin-vu-l"></div></div>
+                    </div>
+                    <div class="vu-ch-row">
+                        <span class="vu-lbl">R</span>
+                        <div class="vu-bar-track"><div class="vu-bar-fill" id="admin-vu-r"></div></div>
+                    </div>
+                    <div class="vu-db-row">
+                        <span>PEAK LEVEL:</span>
+                        <strong id="admin-db-readout">-INF dB</strong>
+                    </div>
+                </div>
+
+                <div class="studio-scope-wrap">
+                    <canvas id="admin-scope-canvas" width="320" height="72"></canvas>
+                </div>
+            </div>
+
+            <!-- FADERS VOLUME & 3-BAND BROADCAST EQ -->
+            <div class="faders-and-eq-grid">
+                <div class="fader-strip">
+                    <label for="fader-music">MUSICA</label>
+                    <input type="range" id="fader-music" min="0" max="100" value="90">
+                    <span id="val-fader-music">90%</span>
+                </div>
+                <div class="fader-strip">
+                    <label for="fader-mic">MIC GAIN</label>
+                    <input type="range" id="fader-mic" min="0" max="150" value="100">
+                    <span id="val-fader-mic">100%</span>
+                </div>
+                <div class="fader-strip">
+                    <label for="fader-master">MASTER TX</label>
+                    <input type="range" id="fader-master" min="0" max="100" value="85">
+                    <span id="val-fader-master">85%</span>
+                </div>
+                <div class="fader-strip eq">
+                    <label for="eq-low">LOW 80Hz</label>
+                    <input type="range" id="eq-low" min="-12" max="12" step="1" value="0">
+                    <span id="val-eq-low">0 dB</span>
+                </div>
+                <div class="fader-strip eq">
+                    <label for="eq-mid">MID 1kHz</label>
+                    <input type="range" id="eq-mid" min="-12" max="12" step="1" value="0">
+                    <span id="val-eq-mid">0 dB</span>
+                </div>
+                <div class="fader-strip eq">
+                    <label for="eq-high">HI 10kHz</label>
+                    <input type="range" id="eq-high" min="-12" max="12" step="1" value="0">
+                    <span id="val-eq-high">0 dB</span>
+                </div>
+            </div>
+
+            <!-- 6 INSTANT JINGLE & BROADCAST FX CART PADS -->
+            <div class="jingle-section-title">CARTUCCE JINGLE &amp; EFFETTI REGIA IN DIRETTA (SUONANO SU TUTTI I RICEVITORI):</div>
+            <div class="jingle-pads-grid">
+                <button type="button" class="jingle-pad" data-jingle="station_id">
+                    🚨 QDG STATION ID
+                </button>
+                <button type="button" class="jingle-pad" data-jingle="siren">
+                    📡 PIRATE DUB SIREN
+                </button>
+                <button type="button" class="jingle-pad" data-jingle="laser">
+                    ⚡ LASER DROP
+                </button>
+                <button type="button" class="jingle-pad" data-jingle="rewind">
+                    📼 TAPE REWIND
+                </button>
+                <button type="button" class="jingle-pad" data-jingle="news_beep">
+                    🔔 TELETEXT BEEP
+                </button>
+                <button type="button" class="jingle-pad glitch-pad" data-jingle="crt_glitch">
+                    📺 DEGAUSS CRT GLITCH
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         RACK 03: LIBRERIA TRACCE, UPLOAD FILE MP3 & CODA AUTODJ
+         ====================================================================== -->
+    <section class="rack-card playlist-rack">
+        <div class="rack-header">
+            <span class="rack-num">RACK 03 // ARCHIVIO AUDIO, UPLOAD MP3 &amp; CODA AUTODJ</span>
+            <span class="rack-status" id="playlist-count-badge">6 TRACCE PRONTE</span>
+        </div>
+
+        <div class="rack-body">
+            <!-- DRAG & DROP FILE UPLOAD ZONE -->
+            <div class="upload-dropzone" id="upload-dropzone">
+                <input type="file" id="file-upload-input" accept="audio/*" multiple style="display:none;">
+                <div class="dropzone-content">
+                    <span class="drop-icon">📂</span>
+                    <div class="drop-text">
+                        <strong>CARICA FILE AUDIO DAL COMPUTER (MP3, WAV, OGG, M4A)</strong>
+                        <span>Clicca qui o trascina i tuoi file audio per aggiungerli alla rotazione radio</span>
+                    </div>
+                    <button type="button" class="btn-browse-files" id="btn-browse-files">+ SFOGLIA FILE</button>
+                </div>
+            </div>
+
+            <!-- AGGIUNTA RAPIDA TRACCIA / STREAM URL ALLA SCALETTA -->
+            <form class="add-stream-form" id="form-add-track">
+                <input type="text" id="new-trk-title" placeholder="Titolo Traccia / Stazione" required>
+                <input type="text" id="new-trk-page" placeholder="Pag (es. 500)" maxlength="3" value="500">
+                <input type="number" id="new-trk-bpm" placeholder="BPM" min="60" max="200" value="128">
+                <input type="text" id="new-trk-url" placeholder="URL MP3 / Stream Icecast" required>
+                <button type="submit" class="btn-add-trk">+ AGGIUNGI</button>
+            </form>
+
+            <!-- LISTA SCALETTA TRACCE -->
+            <div class="playlist-items-container" id="admin-playlist-list">
+                <!-- Popolata dinamicamente da js/admin.js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         RACK 04: CMS TELEVIDEO IN TEMPO REALE (TICKER, METADATI & PAGINE)
+         ====================================================================== -->
+    <section class="rack-card cms-rack">
+        <div class="rack-header">
+            <span class="rack-num">RACK 04 // REGIA GRAFICA TELEVIDEO &amp; BREAKING NEWS TICKER</span>
+            <span class="rack-status">AGGIORNAMENTO ISTANTANEO P100</span>
+        </div>
+
+        <div class="rack-body">
+            <!-- CONTROLLO TESTO SCORREVOLE (MARQUEE TICKER) -->
+            <div class="cms-group">
+                <label for="cms-marquee-input">TESTO SCORREVOLE IN ONDA (MARQUEE VERDE TELEVIDEO):</label>
+                <div class="cms-row">
+                    <input type="text" id="cms-marquee-input" value="*** QDG RADIO ONLINE *** CLICCA SU UNA TRACCIA O PREMI PLAY [100] PER ASCOLTARE LO STREAMING ***">
+                    <button type="button" class="btn-cms-push" id="btn-push-marquee">📡 INVIA AL TICKER</button>
+                </div>
+                <div class="marquee-quick-pills">
+                    <button type="button" class="mq-pill" data-msg="*** DIRETTA STUDIO ATTIVA // DJ SET LIVE IN CORSO SU QDG RADIO [P100] ***">🔴 LIVE DJ SET</button>
+                    <button type="button" class="mq-pill" data-msg="*** SCRIVI IN DIRETTA ALLA REGIA // CANALE INTERATTIVO PAGINA 777 ***">💬 LIVE CHAT P777</button>
+                    <button type="button" class="mq-pill" data-msg="*** ARCHIVIO MIXATI NOTTURNO // SELEZIONE TECHNO & DETROIT 90S [P500-P540] ***">🌙 NIGHT ARCHIVE</button>
+                </div>
+            </div>
+
+            <!-- METADATI ON-AIR PERSONALIZZATI -->
+            <div class="cms-grid-2">
+                <div class="cms-group">
+                    <label for="cms-custom-title">TITOLO TRASMISSIONE / TRACCIA IN ONDA:</label>
+                    <input type="text" id="cms-custom-title" value="A Z INDEX // QDG PIRATE MIX">
+                </div>
+                <div class="cms-group">
+                    <label for="cms-custom-page">PAGINA TELEVIDEO ATTIVA (es. 100, 500):</label>
+                    <div class="cms-row">
+                        <input type="text" id="cms-custom-page" value="100" maxlength="3">
+                        <button type="button" class="btn-cms-push" id="btn-push-metadata">AGGIORNA ON-AIR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BANNER D'EMERGENZA / EDIZIONE STRAORDINARIA TELEVIDEO -->
+            <div class="cms-group emergency-box">
+                <div class="em-head">
+                    <label for="cms-alert-text">🚨 BANNER TELETEXT EDIZIONE STRAORDINARIA (SOVRAIMPRESSIONE CRT):</label>
+                    <button type="button" class="btn-toggle-alert" id="btn-toggle-alert">ATTIVA AVVISO IN ONDA</button>
+                </div>
+                <input type="text" id="cms-alert-text" value="⚡ EDIZIONE STRAORDINARIA // TRASMISSIONE SPECIALE DALLA REGIA QDG RADIO ⚡">
+            </div>
+
+            <!-- EDITOR DELLE 20 VOCI DELL'INDICE TELEVIDEO -->
+            <div class="cms-group">
+                <label>MODIFICA RAPIDA CANALE INDICE TELEVIDEO (P100 - P888):</label>
+                <div class="channel-editor-row">
+                    <select id="cms-select-page">
+                        <option value="100">P100 - A Z INDEX</option>
+                        <option value="500">P500 - TECHNO BEATS</option>
+                        <option value="540">P540 - DETROIT 90S</option>
+                        <option value="200">P200 - AMBIENT MIX1</option>
+                        <option value="550">P550 - VAPORWAVE</option>
+                        <option value="570">P570 - GLITCH ART</option>
+                        <option value="510">P510 - HARDWARE</option>
+                        <option value="695">P695 - INFO RADIO</option>
+                        <option value="555">P555 - GUEST MIX</option>
+                        <option value="777">P777 - LIVE CHAT</option>
+                        <option value="101">P101 - NEWS FREQUENZE</option>
+                        <option value="160">P160 - PODCAST REGIONE</option>
+                        <option value="710">P710 - TAPE REWIND</option>
+                        <option value="640">P640 - RADIO CH1</option>
+                        <option value="300">P300 - TALK SHOW</option>
+                        <option value="888">P888 - INTERVISTE</option>
+                        <option value="400">P400 - EVENTI CLUB</option>
+                        <option value="524">P524 - TRACKLISTS</option>
+                        <option value="600">P600 - MERCHANDISE</option>
+                    </select>
+                    <input type="text" id="cms-edit-cat" placeholder="Nuovo Nome Canale (es. ACID TECHNO)">
+                    <input type="number" id="cms-edit-bpm" placeholder="BPM" value="130" style="width: 78px;">
+                    <button type="button" class="btn-cms-push" id="btn-save-channel">SALVA PAGINA</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script src="js/radio-sync.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -471,6 +471,46 @@ body.televideo-body::after {
     color: var(--tt-black);
 }
 
+.btn-admin-regia {
+    background: var(--tt-magenta);
+    color: var(--tt-black);
+    text-decoration: none;
+}
+
+.btn-admin-regia:hover {
+    background: var(--tt-white);
+    color: var(--tt-black);
+}
+
+/* BANNER EDIZIONE STRAORDINARIA (P999 REGIA OVERLAY) */
+.tx-alert-banner {
+    background: var(--tt-red);
+    color: var(--tt-yellow);
+    border: 2px solid var(--tt-yellow);
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 1.5px;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.65);
+}
+
+/* EFFETTO IMPULSO DEGAUSS / GLITCH CRT DALLA REGIA */
+.televideo-screen.crt-glitch-pulse {
+    animation: crt-degauss 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes crt-degauss {
+    0%   { transform: scale(1) skewX(0deg); filter: hue-rotate(0deg) contrast(1); }
+    20%  { transform: scale(1.03, 0.95) skewX(8deg); filter: hue-rotate(120deg) contrast(2.2); }
+    45%  { transform: scale(0.97, 1.04) skewX(-6deg); filter: hue-rotate(260deg) invert(0.2); }
+    75%  { transform: scale(1.01, 0.99) skewX(3deg); filter: hue-rotate(45deg); }
+    100% { transform: scale(1) skewX(0deg); filter: hue-rotate(0deg) contrast(1); }
+}
+
 /* BLINK ANIMATION */
 .blink {
     animation: blink-anim 0.9s step-end infinite;
